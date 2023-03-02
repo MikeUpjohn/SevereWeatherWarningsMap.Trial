@@ -14,40 +14,47 @@ $(document).ready(function () {
 
     $.get('/SevereWarnings/FloodWarnings', function (data) {
         $(data.features).each(function (i, dataItem) {
-            map.addSource(dataItem.id, {
-                'type': 'geojson',
-                'data': {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Polygon',
-                        // These coordinates outline Maine.
-                        'coordinates': dataItem.geometry.coordinates
+            if (dataItem.geometry != null) {
+                console.log(i);
+                map.addSource(dataItem.id, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Polygon',
+                            // These coordinates outline Maine.
+                            'coordinates': dataItem.geometry.coordinates
+                        }
                     }
-                }
-            });
+                });
 
-            // Add a new layer to visualize the polygon.
-            map.addLayer({
-                'id': dataItem.id,
-                'type': 'fill',
-                'source': dataItem.id, // reference the data source
-                'layout': {},
-                'paint': {
-                    'fill-color': '#00ffff', // blue color fill
-                    'fill-opacity': 0.2
-                }
-            });
-            // Add a black outline around the polygon.
-            map.addLayer({
-                'id': 'outline' + dataItem.id,
-                'type': 'line',
-                'source': dataItem.id,
-                'layout': {},
-                'paint': {
-                    'line-color': '#008080',
-                    'line-width': 1
-                }
-            });
+                var isTornadoWarning = dataItem.properties.event == 'Tornado Warning';
+                var fillColour = isTornadoWarning ? '#FF0000' : '#00ffff';
+                var outlineColour = isTornadoWarning ? '#990033' : '#008080';
+
+                // Add a new layer to visualize the polygon.
+                map.addLayer({
+                    'id': dataItem.id,
+                    'type': 'fill',
+                    'source': dataItem.id, // reference the data source
+                    'layout': {},
+                    'paint': {
+                        'fill-color': fillColour, // blue color fill
+                        'fill-opacity': 0.2
+                    }
+                });
+                // Add a black outline around the polygon.
+                map.addLayer({
+                    'id': 'outline' + dataItem.id,
+                    'type': 'line',
+                    'source': dataItem.id,
+                    'layout': {},
+                    'paint': {
+                        'line-color': outlineColour,
+                        'line-width': 1
+                    }
+                });
+            }
         });
     });
 });
